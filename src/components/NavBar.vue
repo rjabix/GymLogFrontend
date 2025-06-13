@@ -6,14 +6,14 @@
     <div class="navbar-links">
       <RouterLink to="/trainings">Treningi</RouterLink>
       <RouterLink to="/rankings">Ranking</RouterLink>
-      <RouterLink to="/trainers">Trenerzy</RouterLink>
-      <RouterLink to="/admin">Admin</RouterLink>
+      <RouterLink v-if="isTrainerOrAdmin" to="/trainers">Trenerzy</RouterLink>
+      <RouterLink v-if="isAdmin" to="/admin">Admin</RouterLink>
     </div>
     <div class="navbar-icons">
       <RouterLink to="/profile" class="icon">
         <font-awesome-icon :icon="['fas', 'user']" />
       </RouterLink>
-      <RouterLink to="/login" class="icon">
+      <RouterLink to="/login" class="icon" @click.prevent="auth.logout()">
         <font-awesome-icon :icon="['fas', 'sign-out-alt']" />
       </RouterLink>
     </div>
@@ -21,12 +21,20 @@
 </template>
 
 <script setup>
-import { RouterLink } from 'vue-router'
-import { library } from '@fortawesome/fontawesome-svg-core'
-import { faUser, faSignOutAlt } from '@fortawesome/free-solid-svg-icons'
-import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
+import {RouterLink} from 'vue-router'
+import {library} from '@fortawesome/fontawesome-svg-core'
+import {faUser, faSignOutAlt} from '@fortawesome/free-solid-svg-icons'
+import {FontAwesomeIcon} from '@fortawesome/vue-fontawesome'
+import {useAuthStore} from '@/store/auth'
+import {computed} from 'vue'
 
 library.add(faUser, faSignOutAlt)
+
+const auth = useAuthStore()
+
+// Computed properties to reactively update based on auth state
+const isAdmin = computed(() => auth.role === 'admin')
+const isTrainerOrAdmin = computed(() => auth.role === 'trainer' || auth.role === 'admin')
 </script>
 
 <style scoped>
@@ -35,7 +43,7 @@ library.add(faUser, faSignOutAlt)
   align-items: center;
   justify-content: space-between;
   background-color: #f36e7a;
-  padding: 10px 40px;
+  padding: 10px 52px;
   height: 80px;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
 }
@@ -52,6 +60,7 @@ library.add(faUser, faSignOutAlt)
 
 .navbar-links a {
   color: white;
+  font-size: larger;
   font-weight: bold;
   text-decoration: none;
   padding: 8px 12px;
@@ -59,13 +68,14 @@ library.add(faUser, faSignOutAlt)
   transition: background-color 0.2s ease-in-out;
 }
 
-.navbar-links a:hover {
+.navbar-links a:hover, .navbar-icons a:hover {
   background-color: #e85b6e;
 }
 
 .navbar-icons {
   display: flex;
   gap: 20px;
+  border-radius: 6px;
 }
 
 .icon {

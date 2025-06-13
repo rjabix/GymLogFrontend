@@ -27,6 +27,8 @@
 
 <script setup>
 import { ref } from 'vue'
+import axios from "axios";
+import backend_url from "@/router/backend_url.js";
 
 const firstName = ref('')
 const lastName = ref('')
@@ -50,6 +52,30 @@ const submitForm = () => {
   if (!accepted.value) return alert('Zaakceptuj regulamin!')
   if (password.value !== confirmPassword.value) return alert('Hasła nie są takie same!')
   alert('Wysłano formularz -- tu powinno byc wyslanie do API lub inna logika.')
+
+  if (!firstName.value || !lastName.value || !email.value || !password.value) {
+    return alert('Wypełnij wszystkie wymagane pola!')
+  }
+  //TODO : Add validation for email format, password strength, etc.
+  //TODO : Add support for sending image
+  axios.post(backend_url + 'register', {
+    firstName: firstName.value,
+    surName: lastName.value,
+    email: email.value,
+    password: password.value,
+    gender: gender.value,
+    birth_date: dob.value,
+    weight: weight.value,
+    height: height.value
+  })
+    .then(response => {
+      console.log('Registration successful:', response.data)
+      alert('Konto zostało utworzone!')
+    })
+    .catch(error => {
+      console.error('Error during registration:', error)
+      alert('Wystąpił błąd podczas rejestracji.')
+    })
 }
 </script>
 

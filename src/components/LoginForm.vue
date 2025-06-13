@@ -20,6 +20,7 @@
 import { ref } from 'vue'
 import { useAuthStore } from '@/store/auth'
 import { RouterLink } from 'vue-router'
+import router from "@/router/index.js";
 
 const email = ref('')
 const password = ref('')
@@ -27,6 +28,7 @@ const auth = useAuthStore()
 
 const login = async () => {
   await auth.login(email.value, password.value)
+  await router.push('/profile')
 }
 </script>
 
