@@ -1,6 +1,7 @@
 // `src/store/trainings.js`
 import { defineStore } from 'pinia'
 import axios from 'axios'
+import {generateMockupPerformedExercises} from "@/models/performed_exercise.js";
 
 export const useTrainingsStore = defineStore('trainings', {
   state: () => ({
@@ -9,28 +10,11 @@ export const useTrainingsStore = defineStore('trainings', {
   }),
   actions: {
     async fetchTrainings() {
-      function getMockupData() {
-        return [
-          {
-            id: 1,
-            name: 'Cardio Session',
-            duration: 60,
-            date: '2023-10-01',
-            trainer: 'John Doe',
-          },
-          {
-            id: 2,
-            name: 'Strength Training',
-            duration: 90,
-            date: '2023-10-02',
-            trainer: 'Jane Smith',
-          },
-        ]
-      }
+
 
       try {
         // TODO: Uncomment when API is ready: const res = await axios.get('/api/trainings')
-        const res = { data: getMockupData() } // Mockup data for testing
+        const res = { data: generateMockupPerformedExercises() } // Mockup data for testing
         this.trainings = res.data
         this.saveToLocalStorage()
       } catch (err) {

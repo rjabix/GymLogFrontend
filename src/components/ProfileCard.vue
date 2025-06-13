@@ -1,6 +1,6 @@
 <template>
   <div class="container">
-    <div v-if="user" :style="{margin: 'auto'}">
+    <div v-if="user" :style="{margin: 'auto'}" data-aos="fade-right">
       <h2>Twój profil</h2>
       <p><strong>Imię:</strong> {{ user.name }} {{ user.surname }}</p>
       <p><strong>Email:</strong> {{ user.email }}</p>
@@ -12,7 +12,7 @@
       </RouterLink>
     </div>
 
-    <div :style="{width: '100%', margin: 'auto'}">
+    <div :style="{width: '100%', margin: 'auto'}" data-aos="fade-left">
       <h2>Statystyki</h2>
       <div
         :style="{

@@ -7,6 +7,7 @@ import Rankings from '@/pages/Rankings.vue'
 import Trainers from '@/pages/Trainers.vue'
 import AdminPanel from '@/pages/AdminPanel.vue'
 import EditProfile from "@/pages/EditProfile.vue";
+import TrainersZone from "@/pages/TrainersZone.vue";
 
 const routes = [
   { path: '/', redirect: '/login' },
@@ -18,6 +19,7 @@ const routes = [
   { path: '/trainers', component: Trainers },
   { path: '/admin', component: AdminPanel },
   { path: '/edit-profile', component: EditProfile },
+  { path: '/trainers-zone', component: TrainersZone },
   { path: '/:pathMatch(.*)*', redirect: '/profile' } // Catch-all route for undefined paths
 ]
 

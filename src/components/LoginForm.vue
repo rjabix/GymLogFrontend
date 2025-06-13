@@ -1,10 +1,10 @@
 <!-- components/LoginForm.vue -->
 <template>
   <div class="login-container">
-    <div class="logo">
+    <div class="logo" data-aos="fade-right">
       <img src="/gymlog-pony.png" alt="GymLog Logo" />
     </div>
-    <form class="login-form" @submit.prevent="login">
+    <form class="login-form" @submit.prevent="login" data-aos="zoom-out">
       <input v-model="email" type="email" placeholder="email" />
       <input v-model="password" type="password" placeholder="hasło" />
       <button type="submit" class="submit-btn">Zaloguj</button>

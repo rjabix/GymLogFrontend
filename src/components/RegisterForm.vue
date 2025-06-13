@@ -1,9 +1,9 @@
 <template>
   <div class="register-container">
-    <div class="logo">
+    <div class="logo" data-aos="fade-right" data-aos-offset="300">
       <img src="/gymlog-pony.png" alt="GymLog Logo" />
     </div>
-    <form class="register-form" @submit.prevent="submitForm">
+    <form class="register-form" @submit.prevent="submitForm" data-aos="zoom-out">
       <div class="form-grid">
         <input placeholder="imię *" v-model="firstName" />
         <input type="file" @change="uploadImage" />

@@ -1,13 +1,13 @@
 <template>
-  <nav class="navbar">
+  <nav class="navbar" data-aos="fade-down">
     <div class="navbar-logo">
       <img src="/gymlog-pony.png" alt="GymLog Logo" />
     </div>
     <div class="navbar-links">
-      <RouterLink to="/trainings">Treningi</RouterLink>
+      <RouterLink to="/trainings">Moje Treningi</RouterLink>
       <RouterLink to="/rankings">Ranking</RouterLink>
-      <RouterLink v-if="isTrainerOrAdmin" to="/trainers">Trenerzy</RouterLink>
-      <RouterLink v-if="isAdmin" to="/admin">Admin</RouterLink>
+      <RouterLink to="/trainers">Trenerzy</RouterLink>
+      <RouterLink v-if="isTrainerOrAdmin" to="/trainers-zone">Strefa Trenera</RouterLink>
     </div>
     <div class="navbar-icons">
       <RouterLink to="/profile" class="icon">
@@ -33,7 +33,6 @@ library.add(faUser, faSignOutAlt)
 const auth = useAuthStore()
 
 // Computed properties to reactively update based on auth state
-const isAdmin = computed(() => auth.role === 'admin')
 const isTrainerOrAdmin = computed(() => auth.role === 'trainer' || auth.role === 'admin')
 </script>
 
@@ -61,11 +60,16 @@ const isTrainerOrAdmin = computed(() => auth.role === 'trainer' || auth.role ===
 .navbar-links a {
   color: white;
   font-size: larger;
-  font-weight: bold;
   text-decoration: none;
-  padding: 8px 12px;
+  padding: 8px 0;
   border-radius: 6px;
   transition: background-color 0.2s ease-in-out;
+  background: #ea9999;
+  letter-spacing: 1px;
+  font-family: sans-serif;
+  width: 300px; /* Set a fixed width for all links */
+  text-align: center; /* Center the text */
+  white-space: nowrap; /* Prevent text wrapping */
 }
 
 .navbar-links a:hover, .navbar-icons a:hover {
