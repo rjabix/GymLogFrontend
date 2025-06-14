@@ -27,3 +27,19 @@ export function generateMockupPerformedExercises() {
     new PerformedExercise(9, 103, 1, 'Jan Kowalski', 5, 8, 72, '2025-06-08', 206),
   ];
 }
+
+export function generateMockupPerformedExercisesForOnePerson() {
+  return [
+    new PerformedExercise(1, 101, 1, 'Jan Kowalski', 3, 12, 50, '', 201),
+    new PerformedExercise(2, 102, 1, 'Jan Kowalski', 4, 10, 60, '', 201), // Ten sam trening co wyżej
+    new PerformedExercise(100, 103, 1, 'Jan Kowalski', 4, 15, 60, '', 201),
+    new PerformedExercise(121, 104, 1, 'Jan Kowalski', 4, 10, 60, '', 201),
+    new PerformedExercise(123, 105, 1, 'Jan Kowalski', 4, 10, 60, '', 201),
+    new PerformedExercise(7, 101, 1, 'Jan Kowalski', 3, 12, 52, '', 205),
+    new PerformedExercise(8, 102, 1, 'Jan Kowalski', 4, 10, 62, '', 205),
+    new PerformedExercise(9, 103, 1, 'Jan Kowalski', 5, 8, 72, '', 206),
+    new PerformedExercise(10, 104, 1, 'Jan Kowalski', 4, 10, 65, '', 207),
+    new PerformedExercise(11, 105, 1, 'Jan Kowalski', 5, 8, 75, '', 208),
+    new PerformedExercise(12, 102, 1, 'Jan Kowalski', 6, 6, 80, '', 209),
+  ];
+}

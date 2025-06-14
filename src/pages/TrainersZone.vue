@@ -8,6 +8,9 @@
           <option :value="null" disabled>-- Wybierz --</option>
           <option v-for="user in users" :key="user.id" :value="user">{{ user.name }}</option>
         </select>
+        <button @click="resetAllEvaluations" class="reset-button" :disabled="!isSubmitEnabled">
+          Zresetuj
+        </button>
         <button @click="submitAllEvaluations" class="submit-button" :disabled="!isSubmitEnabled">
           Wyślij oceny
         </button>
@@ -63,8 +66,8 @@ import {
   faCircleXmark,
   faCircleCheck
 } from '@fortawesome/free-solid-svg-icons';
-import {generateMockupExercises} from "@/models/exercise.js";
 import {generateMockupPerformedExercises} from "@/models/performed_exercise.js";
+import {useExercisesStore} from "@/store/exercises.js";
 
 // Importuj klasy i funkcje do generowania mockowych danych
 
@@ -79,15 +82,17 @@ export default {
       collapsedTrainingDays: {},
       users: [], // users będzie teraz budowane dynamicznie
       mockPerformedExercises: [],
-      mockExercises: []
+      Exercises: []
     };
   },
   created() {
     //TODO Zmienic mockupy na prawdziwe dane z API!
-    this.mockPerformedExercises = generateMockupPerformedExercises();
-    this.mockExercises = generateMockupExercises();
-    // Przetwórz dane, aby zbudować strukturę `users`
-    this.processRawData();
+    const exercisesStore = useExercisesStore();
+    exercisesStore.fetchExercises().then(() => {
+      this.Exercises = exercisesStore.exercises; // Replace mockup data with store data
+      this.mockPerformedExercises = generateMockupPerformedExercises();
+      this.processRawData();
+    });
   },
   computed: {
     sortedExerciseDates() {
@@ -171,12 +176,22 @@ export default {
 
       if (acceptedExerciseIds.length > 0 || deniedExerciseIds.length > 0) {
         console.log("--- Wysyłanie ocen treningów ---");
+        //TODO Zamień na prawdziwą wysyłkę do API
         console.log(JSON.stringify(submissionPayload, null, 2));
         console.log("--- Wysyłka zakończona (symulacja) ---");
         alert(`Wysłano ${acceptedExerciseIds.length} zaakceptowanych i ${deniedExerciseIds.length} odrzuconych ćwiczeń! Sprawdź konsolę.`);
 
-        // Możesz dodać resetowanie ocen po wysłaniu
-        // this.resetAllEvaluations();
+        // Remove exercises with accepted/denied IDs from local array
+        this.users.forEach(user => {
+          for (const dateKey in user.exerciseLogs) {
+            user.exerciseLogs[dateKey] = user.exerciseLogs[dateKey].filter(
+              exercise => !acceptedExerciseIds.includes(exercise.id) && !deniedExerciseIds.includes(exercise.id)
+            );
+          }
+        });
+
+        console.log("Exercises with accepted/denied IDs have been removed from the local array.");
+
       } else {
         alert("Brak ocenionych ćwiczeń do wysłania.");
         console.log("Brak ocenionych ćwiczeń do wysłania.");
@@ -196,7 +211,7 @@ export default {
     // Nowa metoda do przetwarzania surowych danych z API mock
     processRawData() {
       const usersMap = new Map();
-      const exerciseTemplatesMap = new Map(this.mockExercises.map(ex => [ex.id, ex.name]));
+      const exerciseTemplatesMap = new Map(this.Exercises.map(ex => [ex.id, ex.name]));
 
       this.mockPerformedExercises.forEach(pExercise => {
         // Upewnij się, że użytkownik istnieje w mapie
@@ -327,12 +342,6 @@ export default {
   transform: translateY(-1px);
 }
 
-.submit-button:disabled {
-  background-color: #cccccc;
-  cursor: not-allowed;
-  box-shadow: none;
-  transform: none;
-}
 
 
 /* Date headers */
@@ -444,6 +453,32 @@ export default {
   color: #6a4f2b;
   font-weight: bold;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.reset-button{
+  padding: 10px 20px;
+  background-color: #dc3545; /* Zielony kolor */
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 1em;
+  font-weight: bold;
+  transition: background-color 0.3s ease, transform 0.1s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  white-space: nowrap; /* Zapobiega łamaniu tekstu na małych ekranach */
+}
+
+.reset-button:hover {
+  background-color: #c82333;
+  transform: translateY(-1px);
+}
+
+.submit-button:disabled, .reset-button:disabled {
+  background-color: #cccccc;
+  cursor: not-allowed;
+  box-shadow: none;
+  transform: none;
 }
 
 /* Media queries for responsiveness */

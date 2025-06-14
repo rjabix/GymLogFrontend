@@ -32,6 +32,7 @@ export const useAuthStore = defineStore('auth', {
       }
 
       try {
+        console.log("Fetching user data for login...")
         //TODO : uncomment when ready: res = await axios.post('/api/login', { email, password })
         const res = getMockupData() // Mockup data for testing
         this.token = res.data.token

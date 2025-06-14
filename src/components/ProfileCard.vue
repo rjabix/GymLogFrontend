@@ -61,7 +61,10 @@ import CalendarLabel from 'cal-heatmap/plugins/CalendarLabel';
 import LegendLite from 'cal-heatmap/plugins/LegendLite';
 import Tooltip from 'cal-heatmap/plugins/Tooltip';
 import * as dayjs from "dayjs";
+import localeDate from "dayjs/plugin/localeData";
 import { useTrainingsStore } from "@/store/trainings.js";
+
+dayjs.extend(localeDate);
 
 const authStore = useAuthStore();
 const trainingsStore = useTrainingsStore();

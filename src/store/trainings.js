@@ -2,6 +2,7 @@
 import { defineStore } from 'pinia'
 import axios from 'axios'
 import {generateMockupPerformedExercises} from "@/models/performed_exercise.js";
+import {generateMockupTrainingsForOnePerson} from "@/models/training.js";
 
 export const useTrainingsStore = defineStore('trainings', {
   state: () => ({
@@ -10,11 +11,14 @@ export const useTrainingsStore = defineStore('trainings', {
   }),
   actions: {
     async fetchTrainings() {
-
-
+      console.log('Fetching trainings...')
+      if (this.trainings.length > 0) {
+        // If trainings are already loaded, do not fetch again
+        return
+      }
       try {
         // TODO: Uncomment when API is ready: const res = await axios.get('/api/trainings')
-        const res = { data: generateMockupPerformedExercises() } // Mockup data for testing
+        const res = { data: generateMockupTrainingsForOnePerson() } // Mockup data for testing
         this.trainings = res.data
         this.saveToLocalStorage()
       } catch (err) {
@@ -37,10 +41,11 @@ export const useTrainingsStore = defineStore('trainings', {
       this.saveToLocalStorage()
     },
     saveToLocalStorage() {
-      localStorage.setItem('trainingsStore', JSON.stringify(this.trainings))
+      sessionStorage.setItem('trainingsStore', JSON.stringify(this.trainings))
+      console.log('Trainings state saved to localStorage')
     },
     loadFromLocalStorage() {
-      const savedState = localStorage.getItem('trainingsStore')
+      const savedState = sessionStorage.getItem('trainingsStore')
       if (savedState) {
         this.trainings = JSON.parse(savedState)
       }
