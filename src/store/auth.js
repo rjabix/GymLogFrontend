@@ -2,6 +2,7 @@ import { defineStore } from 'pinia'
 import axios from 'axios'
 import User from "@/models/user.js"
 import router from "@/router/index.js";
+import backend_url from '@/router/backend_url';
 
 export const useAuthStore = defineStore('auth', {
   state: () => ({
@@ -34,8 +35,9 @@ export const useAuthStore = defineStore('auth', {
 
       try {
         console.log("Fetching user data for login...")
-        //TODO : uncomment when ready: res = await axios.post('/api/login', { email, password })
-        const res = getMockupData() // Mockup data for testing
+        //TODO : uncomment when ready: 
+        const res = await axios.post(backend_url + '/users/login', { email, password }, { withCredentials: true})
+        //const res = getMockupData() // Mockup data for testing
         this.token = res.data.token
         this.user = new User(
           res.data.user.id,

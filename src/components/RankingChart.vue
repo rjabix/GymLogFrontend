@@ -36,7 +36,7 @@ export default {
     };
 
     const filteredExercises = computed(() =>
-      exercisesStore.exercises.filter((exercise) => exercise.IsCountedInRankings)
+      exercisesStore.exercises.filter((exercise) => exercise.isCountedForRanking)
     );
 
     onMounted(async () => {

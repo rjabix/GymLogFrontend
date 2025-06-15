@@ -260,6 +260,11 @@ export default {
     this.initializeCollapsedStates();
   }
 };
+
+const getExercisesForTrainer = async () => {
+  
+}
+
 </script>
 
 <style scoped>

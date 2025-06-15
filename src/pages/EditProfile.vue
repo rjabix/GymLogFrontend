@@ -1,5 +1,5 @@
 <template>
-  <div class="edit-profile-container">
+  <div class="edit-profile-container" data-aos="fade-up">
     <h1>Zmień dane</h1>
     <form @submit.prevent="updateProfile">
       <div class="form-grid">
@@ -21,7 +21,12 @@
         </div>
         <div class="form-group">
           <label for="gender">Płeć</label>
-          <input id="gender" v-model="form.gender" type="text" required />
+          <select id="gender" v-model="form.gender" required class="styled-select">
+            <option value="">Wybierz</option>
+            <option value="M">Mężczyzna</option>
+            <option value="W">Kobieta</option>
+            <option value="O">Inne</option>
+          </select>
         </div>
         <div class="form-group">
           <label for="birth_date">Data urodzenia</label>
@@ -35,11 +40,15 @@
 
 <script setup>
 import { useAuthStore } from '@/store/auth'
-import { reactive } from 'vue'
+import { reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
+import axios from 'axios'
+
+const backend_url = 'http://localhost:8000' // Zmień na swój backend_url
 
 const auth = useAuthStore()
 const router = useRouter()
+const message = ref('')
 
 const form = reactive({
   name: auth.user?.name || '',
@@ -50,18 +59,29 @@ const form = reactive({
   birth_date: auth.user?.birth_date || ''
 })
 
-function updateProfile() {
-  auth.user = { ...auth.user, ...form }
-  auth.saveToLocalStorage()
-  alert('Profile updated successfully!')
-  router.push('/profile')
+async function updateProfile() {
+  try {
+    await axios.put(
+      `${backend_url}/users/update`,
+      form,
+      { withCredentials: true }
+    )
+    // Aktualizuj lokalnie
+    auth.user = { ...auth.user, ...form }
+    auth.saveToLocalStorage()
+    alert('Dane profilu zostały zaktualizowane!')
+    router.push('/profile')
+  } catch (error) {
+    alert('Błąd podczas aktualizacji profilu!')
+    console.error(error)
+  }
 }
 </script>
 
 <style scoped>
 .edit-profile-container {
   max-width: 500px;
-  margin: 0 auto;
+  margin: auto auto;
   padding: 20px;
   background-color: #fdffe6;
   border-radius: 8px;
@@ -91,11 +111,22 @@ label {
   font-family: sans-serif;
 }
 
-input {
+input,
+.styled-select {
   padding: 10px;
   border: 2px solid #f36e7a;
   border-radius: 10px;
   background: none;
+}
+
+.styled-select {
+  /* Dopasuj wygląd selecta do inputa */
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  background-color: none;
+  font-size: 1rem;
+  color: #333;
 }
 
 .submit-btn {

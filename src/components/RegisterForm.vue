@@ -8,7 +8,12 @@
         <input placeholder="imię *" v-model="firstName" />
         <input type="file" @change="uploadImage" />
         <input placeholder="nazwisko *" v-model="lastName" />
-        <input placeholder="płeć" v-model="gender" />
+        <select id="gender" v-model="gender" class="select-form" >
+            <option value="">Płeć</option>
+            <option value="M">Mężczyzna</option>
+            <option value="W">Kobieta</option>
+            <option value="O">Inne</option>
+        </select>
         <input placeholder="adres e-mail *" v-model="email" />
         <input type="date" placeholder="data urodzenia" v-model="dob" />
         <input type="password" placeholder="hasło *" v-model="password" />
@@ -51,23 +56,26 @@ const uploadImage = (e) => {
 const submitForm = () => {
   if (!accepted.value) return alert('Zaakceptuj regulamin!')
   if (password.value !== confirmPassword.value) return alert('Hasła nie są takie same!')
-  alert('Wysłano formularz -- tu powinno byc wyslanie do API lub inna logika.')
+  
 
   if (!firstName.value || !lastName.value || !email.value || !password.value) {
     return alert('Wypełnij wszystkie wymagane pola!')
   }
+
+  alert('Wysłano formularz -- tu powinno byc wyslanie do API lub inna logika.')
   //TODO : Add validation for email format, password strength, etc.
   //TODO : Add support for sending image
-  axios.post(backend_url + 'register', {
-    firstName: firstName.value,
-    surName: lastName.value,
-    email: email.value,
-    password: password.value,
-    gender: gender.value,
-    birth_date: dob.value,
-    weight: weight.value,
-    height: height.value
-  })
+  console.log(backend_url + '/users/register')
+  axios.post(backend_url + '/users/register', {
+  name: firstName.value,
+  surname: lastName.value,
+  email: email.value.toLowerCase(),
+  password: password.value,
+  gender: gender.value,
+  birth_date: dob.value,
+  weight: weight.value,
+  height: height.value
+})
     .then(response => {
       console.log('Registration successful:', response.data)
       alert('Konto zostało utworzone!')
@@ -111,7 +119,7 @@ const submitForm = () => {
   gap: 10px;
 }
 
-.form-grid input {
+.form-grid input, .select-form {
   padding: 10px;
   border-radius: 8px;
   border: none;
@@ -122,6 +130,18 @@ const submitForm = () => {
 
 .form-grid input::placeholder {
   color: #ffeaea;
+}
+
+.styled-select {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  background-color: #f89ca7;
+  color: white;
+  font-size: 0.95rem;
+  border: none;
+  border-radius: 8px;
+  padding: 10px;
 }
 
 .checkbox {
