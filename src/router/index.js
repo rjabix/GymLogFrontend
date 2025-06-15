@@ -8,6 +8,7 @@ import Trainers from '@/pages/Trainers.vue'
 import AdminPanel from '@/pages/AdminPanel.vue'
 import EditProfile from "@/pages/EditProfile.vue";
 import TrainersZone from "@/pages/TrainersZone.vue";
+import TrainingPage from "@/pages/TrainingPage.vue";
 
 const routes = [
   { path: '/', redirect: '/login' },
@@ -20,7 +21,7 @@ const routes = [
   { path: '/admin', component: AdminPanel },
   { path: '/edit-profile', component: EditProfile },
   { path: '/trainers-zone', component: TrainersZone },
-  { path: '/training/:id', component: Trainings, props: true }, // Dynamic route for training details
+  { path: '/training/:id', name: 'TrainingDetails', component: TrainingPage, props: true }, // Dynamic route for training details
   { path: '/:pathMatch(.*)*', redirect: '/profile' } // Catch-all route for undefined paths
 ]
 

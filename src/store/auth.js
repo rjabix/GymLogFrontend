@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia'
 import axios from 'axios'
 import User from "@/models/user.js"
+import router from "@/router/index.js";
 
 export const useAuthStore = defineStore('auth', {
   state: () => ({
@@ -50,7 +51,7 @@ export const useAuthStore = defineStore('auth', {
           res.data.user.is_active
         )
         this.role = this.user.role
-        axios.defaults.headers.common['Authorization'] = `Bearer ${this.token}`
+        axios.defaults.headers.common['Authorization'] = `GymLog ${this.token}`
         this.saveToLocalStorage() // Save state to localStorage
       } catch (err) {
         alert('Błędne dane logowania' + err.message)
@@ -93,6 +94,16 @@ export const useAuthStore = defineStore('auth', {
         if (this.token) {
           axios.defaults.headers.common['Authorization'] = `Bearer ${this.token}`
         }
+        return;
+      }
+      // If no saved state, redirect to login page
+      if (!this.user || !this.token) {
+        console.warn('No saved auth state found, redirecting to login.')
+        this.user = null
+        this.token = null
+        this.role = null
+        delete axios.defaults.headers.common['Authorization']
+        router.push('/login')
       }
     }
   }

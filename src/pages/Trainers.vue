@@ -7,7 +7,7 @@
       <div v-for="trainer in trainers" :key="trainer.id" class="trainer-card">
         <div class="trainer-info">
           <h3 class="trainer-name">{{ trainer.name }}</h3>
-          <p class="trainer-contact">adres e-mail: {{ trainer.email }}</p>
+          <p class="trainer-contact">{{ trainer.email }}</p>
           <p class="trainer-contact">telefon: {{ trainer.phone }}</p>
         </div>
         <div class="trainer-image-container">

@@ -1,7 +1,6 @@
 // `src/store/trainings.js`
 import { defineStore } from 'pinia'
 import axios from 'axios'
-import {generateMockupPerformedExercises} from "@/models/performed_exercise.js";
 import {generateMockupTrainingsForOnePerson} from "@/models/training.js";
 
 export const useTrainingsStore = defineStore('trainings', {
@@ -11,14 +10,15 @@ export const useTrainingsStore = defineStore('trainings', {
   }),
   actions: {
     async fetchTrainings() {
-      console.log('Fetching trainings...')
       if (this.trainings.length > 0) {
         // If trainings are already loaded, do not fetch again
         return
       }
       try {
+        console.log('Fetching trainings...')
         // TODO: Uncomment when API is ready: const res = await axios.get('/api/trainings')
         const res = { data: generateMockupTrainingsForOnePerson() } // Mockup data for testing
+        console.log('Fetched trainings:', JSON.stringify(res.data, null, 2))
         this.trainings = res.data
         this.saveToLocalStorage()
       } catch (err) {

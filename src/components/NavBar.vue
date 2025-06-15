@@ -4,16 +4,16 @@
       <img src="/gymlog-pony.png" alt="GymLog Logo" />
     </div>
     <div class="navbar-links">
-      <RouterLink to="/trainings">Moje Treningi</RouterLink>
-      <RouterLink to="/rankings">Ranking</RouterLink>
-      <RouterLink to="/trainers">Trenerzy</RouterLink>
-      <RouterLink v-if="isTrainerOrAdmin" to="/trainers-zone">Strefa Trenera</RouterLink>
+      <RouterLink to="/trainings" exact-active-class="active-link">Moje Treningi</RouterLink>
+      <RouterLink to="/rankings" exact-active-class="active-link">Ranking</RouterLink>
+      <RouterLink to="/trainers" exact-active-class="active-link">Trenerzy</RouterLink>
+      <RouterLink v-if="isTrainerOrAdmin" to="/trainers-zone" active-class="active-link">Strefa Trenera</RouterLink>
     </div>
     <div class="navbar-icons">
-      <RouterLink to="/profile" class="icon">
+      <RouterLink to="/profile" class="icon" active-class="active-link">
         <font-awesome-icon :icon="['fas', 'user']" />
       </RouterLink>
-      <RouterLink to="/login" class="icon" @click.prevent="auth.logout()">
+      <RouterLink to="/login" class="icon" @click.prevent="auth.logout()" active-class="active-link">
         <font-awesome-icon :icon="['fas', 'sign-out-alt']" />
       </RouterLink>
     </div>
@@ -67,9 +67,9 @@ const isTrainerOrAdmin = computed(() => auth.role === 'trainer' || auth.role ===
   background: #ea9999;
   letter-spacing: 1px;
   font-family: sans-serif;
-  width: 300px; /* Set a fixed width for all links */
-  text-align: center; /* Center the text */
-  white-space: nowrap; /* Prevent text wrapping */
+  width: 300px;
+  text-align: center;
+  white-space: nowrap;
 }
 
 .navbar-links a:hover, .navbar-icons a:hover {
@@ -91,5 +91,9 @@ const isTrainerOrAdmin = computed(() => auth.role === 'trainer' || auth.role ===
 
 .icon:hover {
   transform: scale(1.1);
+}
+
+::v-deep(.active-link) {
+  background-color: #e85b6e; /* Same as hover color */
 }
 </style>
