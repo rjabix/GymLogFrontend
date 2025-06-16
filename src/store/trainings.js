@@ -3,6 +3,8 @@ import { defineStore } from 'pinia'
 import axios from 'axios'
 import {generateMockupTrainingsForOnePerson} from "@/models/training.js";
 import backend_url from "@/router/backend_url.js";
+import {useRouter} from "vue-router";
+import router from "@/router/index.js";
 
 export const useTrainingsStore = defineStore('trainings', {
   state: () => ({
@@ -18,6 +20,9 @@ export const useTrainingsStore = defineStore('trainings', {
       try {
         console.log('Fetching trainings...')
         const res = await axios.get(backend_url+'/trainings/my-trainings', { withCredentials: true })
+
+        if(res.status === 401) await router.push('/login') // Redirect to login if unauthorized
+
         //const res = { data: generateMockupTrainingsForOnePerson() } // Mockup data for testing
         console.log('Fetched trainings:', JSON.stringify(res.data, null, 2))
         this.trainings = res.data

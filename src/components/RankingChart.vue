@@ -12,39 +12,131 @@
     </div>
 
     <div class="ranking-chart">
-      <div class="chart-placeholder">
-        <p v-if="selectedExercise">Dane dla: <strong>{{ selectedExercise.name }}</strong></p>
-        <p v-else>Wybierz ćwiczenie z listy po lewej</p>
-        <!-- Tutaj dodasz wykres w przyszłości -->
+      <div v-if="selectedExercise" class="chart-container">
+        <canvas id="rankingChart"></canvas>
+      </div>
+      <div v-else class="chart-placeholder">
+        <p>Wybierz ćwiczenie z listy po lewej</p>
       </div>
     </div>
   </div>
 </template>
 
 <script>
-import { ref, onMounted, computed } from 'vue';
+import { ref, onMounted, watch } from 'vue';
 import { useExercisesStore } from '@/store/exercises.js';
+import { useRankingsStore } from '@/store/rankings.js';
+import { Chart } from 'chart.js';
+
+import {
+  CategoryScale,
+  LinearScale,
+  LineController,
+  LineElement,
+  PointElement,
+  Title,
+  Tooltip,
+  Legend,
+} from 'chart.js';
+
+// Register the required components
+Chart.register(
+  CategoryScale,
+  LinearScale,
+  LineController,
+  LineElement,
+  PointElement,
+  Title,
+  Tooltip,
+  Legend
+);
 
 export default {
   name: 'ExerciseRanking',
   setup() {
     const exercisesStore = useExercisesStore();
+    const rankingsStore = useRankingsStore();
     const selectedExercise = ref(null);
+    const chartInstance = ref(null);
+    const exercises = ref([]);
 
-    const selectExercise = (exercise) => {
+    const selectExercise = async (exercise) => {
       selectedExercise.value = exercise;
+
+      // Fetch ranking data for the selected exercise
+      const rankingData = await rankingsStore.fetchRanking(exercise.id);
+
+      // Update the chart with the new data
+      updateChart(rankingData.labels, rankingData.data);
     };
 
-    const filteredExercises = computed(() =>
-      exercisesStore.exercises.filter((exercise) => exercise.isCountedForRanking)
-    );
+    const updateChart = (labels, data) => {
+      if (chartInstance.value) {
+        chartInstance.value.destroy(); // Destroy the previous chart instance
+      }
+
+      const ctx = document.getElementById('rankingChart').getContext('2d');
+      chartInstance.value = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: labels,
+          datasets: [
+            {
+              label: 'One Rep Max Progression',
+              data: data,
+              borderColor: '#42a5f5',
+              backgroundColor: 'rgba(66, 165, 245, 0.2)',
+              borderWidth: 2,
+              tension: 0.3,
+            },
+          ],
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              display: true,
+              position: 'top',
+            },
+          },
+          scales: {
+            x: {
+              title: {
+                display: true,
+                text: 'Week',
+              },
+            },
+            y: {
+              title: {
+                display: true,
+                text: 'One Rep Max',
+              },
+              beginAtZero: true,
+            },
+          },
+        },
+      });
+    };
 
     onMounted(async () => {
       await exercisesStore.fetchExercises();
     });
 
+    watch(
+      () => exercisesStore.exercises,
+      async (newExercises) => {
+        if (newExercises.length > 0) {
+          exercises.value = newExercises.filter((exercise) => exercise.isCountedForRanking);
+
+          // Automatically select the first exercise and draw the chart
+          await selectExercise(exercises.value[0]);
+        }
+      }
+    );
+
     return {
-      exercises: filteredExercises,
+      exercises,
       selectedExercise,
       selectExercise,
     };
@@ -52,11 +144,10 @@ export default {
 };
 </script>
 
-
 <style scoped>
 .ranking-page {
   display: flex;
-  height: 70vh; /* Full height of the viewport */
+  height: 70vh;
   padding: 50px;
   background-color: #fdffe6;
   gap: 20px;
@@ -68,8 +159,8 @@ export default {
   gap: 12px;
   margin-top: auto;
   margin-bottom: auto;
-  min-width: 300px; /* Increased size */
-  flex-basis: 300px; /* Ensures it takes up more space */
+  min-width: 300px;
+  flex-basis: 300px;
 }
 
 .exercise-button {
@@ -94,9 +185,9 @@ export default {
 }
 
 .ranking-chart {
-  flex-grow: 1; /* Takes up the remaining space */
-  height: 100%; /* Ensures it stretches to the full height of the parent */
-  box-sizing: border-box; /* Includes padding in the height calculation */
+  flex-grow: 1;
+  height: 100%;
+  box-sizing: border-box;
   background-color: #fbe9e7;
   border: 4px solid #ef9a9a;
   border-radius: 20px;
@@ -104,6 +195,11 @@ export default {
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+.chart-container {
+  width: 100%;
+  height: 100%;
 }
 
 .chart-placeholder {
