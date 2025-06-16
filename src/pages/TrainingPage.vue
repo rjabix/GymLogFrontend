@@ -9,7 +9,7 @@
             class="exercise-card"
           >
             <div class="exercise-header" @click="toggle(index)">
-              {{ getExerciseName(exercise.exerciseId) }}
+              {{ getExerciseName(exercise.exercise_id) }}
               <span>{{ expanded.includes(index) ? "▲" : "▼" }}</span>
             </div>
 
@@ -24,7 +24,7 @@
             </div>
           </div>
           <div v-if="showAddForm" class="add-form">
-            <select v-model="newExercise.exerciseId">
+            <select v-model="newExercise.exercise_id">
               <option disabled value="">Wybierz ćwiczenie</option>
               <option
                 v-for="exercise in exercisesStore.exercises"
@@ -141,7 +141,7 @@ export default {
 
     const showAddForm = ref(false);
     const newExercise = ref({
-      exerciseId: "",
+      exercise_id: "",
       weight: null,
       sets: null,
       reps: null,
@@ -149,7 +149,7 @@ export default {
 
     const submitExercise = () => {
       if (
-        !newExercise.value.exerciseId ||
+        !newExercise.value.exercise_id ||
         newExercise.value.weight <= 0 ||
         newExercise.value.sets <= 0 ||
         newExercise.value.reps <= 0
@@ -161,8 +161,7 @@ export default {
       if (training.value) {
         exercisesStore.addExercise({
           trainingId: trainingId,
-          exerciseId: newExercise.value.exerciseId,
-          userId: authStore.user.id,
+          exercise_id: newExercise.value.exercise_id,
           sets: newExercise.value.sets,
           reps: newExercise.value.reps,
           weight: newExercise.value.weight,
@@ -170,7 +169,7 @@ export default {
 
         // Reset and hide the form
         newExercise.value = {
-          exerciseId: "",
+          exercise_id: "",
           weight: null,
           sets: null,
           reps: null,

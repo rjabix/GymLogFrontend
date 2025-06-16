@@ -3,7 +3,7 @@
     <h2 class="trainings-title">Moje Treningi</h2>
 
     <div v-if="trainings.length > 0" class="training-cards-grid">
-      <div v-for="training in trainings" :key="training.id" class="training-card">
+      <div v-for="training in trainings.sort((a, b) => new Date(b.start_time) - new Date(a.start_time))" :key="training.id" class="training-card">
         <div class="training-date-header">
           {{ formatDisplayDate(training.start_time) }}
         </div>
@@ -36,10 +36,11 @@
     <div v-else class="no-trainings-message">
       Brak dostępnych treningów.
     </div>
+
+    <!-- Fixed Add Training Button -->
+    <button class="add-training-button" @click="redirectToAddTraining">Dodaj Trening</button>
   </div>
 </template>
-
-
 
 <script>
 import { useTrainingsStore } from "@/store/trainings.js";
@@ -55,13 +56,12 @@ export default {
     const router = useRouter();
 
     const trainings = computed(() => {
-      // Map exercise names dynamically using the exercises store
       const exerciseNameMap = new Map(exercisesStore.exercises.map(ex => [ex.id, ex.name]));
       return trainingsStore.trainings.map(training => ({
         ...training,
         exercises: training.exercises.map(exercise => ({
           ...exercise,
-          name: exerciseNameMap.get(exercise.exerciseId) || "Unknown Exercise",
+          name: exerciseNameMap.get(exercise.exercise_id) || "Unknown Exercise",
         })),
       }));
     });
@@ -79,6 +79,10 @@ export default {
       router.push(`/training/${trainingId}`);
     };
 
+    const redirectToAddTraining = () => {
+      router.push("/add-training");
+    };
+
     onMounted(async () => {
       await exercisesStore.fetchExercises();
       await trainingsStore.fetchTrainings();
@@ -89,6 +93,7 @@ export default {
       formatDisplayDate,
       formatTime,
       redirectToDetails,
+      redirectToAddTraining,
     };
   },
 };
@@ -215,10 +220,27 @@ export default {
   margin-top: 20px;
 }
 
-@media (max-width: 850px) {
-  .training-cards-grid {
-    grid-template-columns: 1fr;
-  }
+.add-training-button {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 80%;
+  background-color: #f36e7a;
+  color: white;
+  border: none;
+  border-radius: 12px;
+  height: 60px;
+  font-size: 1.5em;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  cursor: pointer;
+  transition: background-color 0.3s ease;
 }
 
+.add-training-button:hover {
+  background-color: #e53935;
+}
 </style>

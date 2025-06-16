@@ -2,6 +2,7 @@
 import { defineStore } from 'pinia'
 import axios from 'axios'
 import {generateMockupTrainingsForOnePerson} from "@/models/training.js";
+import backend_url from "@/router/backend_url.js";
 
 export const useTrainingsStore = defineStore('trainings', {
   state: () => ({
@@ -16,8 +17,8 @@ export const useTrainingsStore = defineStore('trainings', {
       }
       try {
         console.log('Fetching trainings...')
-        // TODO: Uncomment when API is ready: const res = await axios.get('/api/trainings')
-        const res = { data: generateMockupTrainingsForOnePerson() } // Mockup data for testing
+        const res = await axios.get(backend_url+'/trainings/my-trainings', { withCredentials: true })
+        //const res = { data: generateMockupTrainingsForOnePerson() } // Mockup data for testing
         console.log('Fetched trainings:', JSON.stringify(res.data, null, 2))
         this.trainings = res.data
         this.saveToLocalStorage()
@@ -25,7 +26,11 @@ export const useTrainingsStore = defineStore('trainings', {
         console.error('Error fetching trainings:', err.message)
       }
     },
-    addTraining(training) {
+    async addTraining(training) {
+
+      const res = await axios.post(backend_url + '/trainings/add-training', training, {withCredentials: true})
+      if(!res.status === 200) { alert('Error adding training: ' + res.statusText); return; }
+      training.id = res.data.id
       this.trainings.push(training)
       this.saveToLocalStorage()
     },

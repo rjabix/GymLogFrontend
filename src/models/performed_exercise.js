@@ -3,7 +3,7 @@ export default class PerformedExercise {
   constructor(id, exerciseId, userId, userName, sets, reps, weight, date, trainingId, isVerified) {
     this.id = id; // Unikalne ID wykonanego ćwiczenia
     this.trainingId = trainingId; // ID sesji treningowej
-    this.exerciseId = exerciseId; // ID szablonu ćwiczenia (z Exercise.js)
+    this.exercise_id = exerciseId; // ID szablonu ćwiczenia (z Exercise.js)
     this.userId = userId;
     this.userName = userName; // Zmieniono z UserName na userName dla spójności
     this.sets = sets;

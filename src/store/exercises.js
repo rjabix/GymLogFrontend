@@ -25,31 +25,29 @@ export const useExercisesStore = defineStore('exercises', {
         console.error('Error fetching exercises:', err.message);
       }
     },
-    
-    addExercise(exercise) {
+
+    async addExercise(exercise) {
 
       const trainingsStore = useTrainingsStore();
 
       const newExercise = {
-        trainingId: exercise.trainingId,
-        exerciseId: exercise.exerciseId, // Use the passed exercise object
-        userId: exercise.userId,
-        sets: exercise.sets,
+        training_id: exercise.trainingId,
+        exercise_id: exercise.exercise_id, // Use the passed exercise object
+        series: exercise.sets,
         reps: exercise.reps,
         weight: exercise.weight,
       };
 
-      if (newExercise.sets < 0 || newExercise.sets > 20 ||
-         newExercise.reps < 0 || newExercise.reps > 100 ||
-         newExercise.weight < 0 || newExercise.weight > 500) {
+      if (newExercise.series < 0 || newExercise.series > 20 ||
+        newExercise.reps < 0 || newExercise.reps > 100 ||
+        newExercise.weight < 0 || newExercise.weight > 500) {
         console.error('Invalid exercise data:', newExercise);
         alert('Invalid exercise data. Please check the values and try again.');
         return;
       }
 
       console.log('Adding performed exercise:', newExercise);
-      // TODO: Implement API call to add exercise const res = await axios.post('/api/add-exercise', newExercise); -- will return the id of new exercise
-      const res = { data: { id: Math.floor(Math.random() * 1000) } }; // Mockup response
+      const res = await axios.post(backend_url+'/trainings/my-exercises/add', newExercise, {withCredentials: true});
       const id = res.data.id;
       console.log('Exercise added with ID:', id);
 
