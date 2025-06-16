@@ -1,5 +1,12 @@
 <template>
-  <ProfileCard />
+  <Suspense>
+    <template #default>
+      <ProfileCard />
+    </template>
+    <template #fallback>
+      <div>Loading...</div>
+    </template>
+  </Suspense>
 </template>
 
 <script setup>

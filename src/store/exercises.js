@@ -13,7 +13,7 @@ export const useExercisesStore = defineStore('exercises', {
     async fetchExercises() {
       if (this.exercises.length > 0) {
         // If exercises are already loaded, do not fetch again
-        return;
+        return this.exercises;
       }
       try {
         console.log('Fetching exercises...');

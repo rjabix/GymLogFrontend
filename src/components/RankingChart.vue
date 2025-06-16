@@ -24,6 +24,7 @@
 
 <script>
 import { ref, onMounted, watch } from 'vue';
+import { onBeforeRouteUpdate} from "vue-router";
 import { useExercisesStore } from '@/store/exercises.js';
 import { useRankingsStore } from '@/store/rankings.js';
 import { Chart } from 'chart.js';
@@ -119,21 +120,24 @@ export default {
       });
     };
 
-    onMounted(async () => {
+    const initializeComponent = async () => {
       await exercisesStore.fetchExercises();
+      exercises.value = exercisesStore.exercises.filter((exercise) => exercise.isCountedForRanking);
+
+      if (exercises.value.length > 0) {
+        await selectExercise(exercises.value[0]);
+      }
+    };
+
+    onMounted(async () => {
+      await initializeComponent();
     });
 
-    watch(
-      () => exercisesStore.exercises,
-      async (newExercises) => {
-        if (newExercises.length > 0) {
-          exercises.value = newExercises.filter((exercise) => exercise.isCountedForRanking);
-
-          // Automatically select the first exercise and draw the chart
-          await selectExercise(exercises.value[0]);
-        }
-      }
-    );
+    onBeforeRouteUpdate(async (to, from, next) => {
+      // Reinitialize the component when the route changes
+      await initializeComponent();
+      next();
+    });
 
     return {
       exercises,

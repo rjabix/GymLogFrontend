@@ -52,9 +52,10 @@
 </template>
 
 <script setup>
-import {useAuthStore} from '@/store/auth';
+import { useAuthStore } from '@/store/auth';
+import { useRankingsStore } from '@/store/rankings.js';
 import router from '@/router/index.js';
-import {onMounted} from 'vue';
+import {ref, onMounted, toRaw, watch, nextTick} from 'vue';
 import CalHeatmap from 'cal-heatmap';
 import 'cal-heatmap/cal-heatmap.css';
 import CalendarLabel from 'cal-heatmap/plugins/CalendarLabel';
@@ -62,15 +63,13 @@ import LegendLite from 'cal-heatmap/plugins/LegendLite';
 import Tooltip from 'cal-heatmap/plugins/Tooltip';
 import * as dayjs from "dayjs";
 import localeDate from "dayjs/plugin/localeData";
-import { useTrainingsStore } from "@/store/trainings.js";
+import backend_url from "@/router/backend_url.js";
 
 dayjs.extend(localeDate);
 
 const authStore = useAuthStore();
-const trainingsStore = useTrainingsStore();
-/** @type {User | null} */
+const rankingsStore = useRankingsStore();
 const user = authStore.user;
-const trainings = trainingsStore.trainings;
 
 if (user == null) {
   console.warn('UserData is null -- redirecting to login.');
@@ -90,78 +89,92 @@ const bmiCategory = user
   : null;
 
 let cal;
+const nextMonthDate = new Date().setMonth(new Date().getMonth() + 5);
+const startMonthDate = new Date().setMonth(new Date().getMonth() - 5);
 
-const nextMonthDate = new Date().setMonth(new Date().getMonth()+5);
-const startMonthDate = new Date().setMonth(new Date().getMonth()-5);
+onMounted(async () => {
+  // Wait for the DOM to be fully rendered
+  await nextTick();
 
-onMounted(() => {
-  cal = new CalHeatmap();
-  cal.paint(
-    {
-      data: {
-        source: trainings,
-        x: 'date',
-        y: d => +d['temp_max'],
-        groupY: 'max',
-      },
-      date: {
-        start: startMonthDate,
-        max: nextMonthDate,
-        locale: 'pl',
-        highlight: [new Date()],
-      },
-      range: 12,
-      scale: {
-        color: {
-          type: 'threshold',
-          range: ['#14432a', '#166b34', '#37a446', '#4dd05a'],
-          domain: [10, 20, 30],
-        },
-      },
-      domain: {
-        type: 'month',
-        gutter: 12,
-        label: { text: 'MMM', textAlign: 'start', position: 'top' },
-      },
-      subDomain: { type: 'ghDay', radius: 2, width: 14, height: 14, gutter: 4, label: 'D' },
-      itemSelector: '#ex-ghDay',
-    },
-    [
-      [
-        Tooltip,
-        {
-          text: function (date, value, dayjsDate) {
-            return (
-              (value ? value : 'No') +
-              ' contributions on ' +
-              dayjsDate.format('dddd, MMMM D, YYYY')
-            );
-          },
-        },
-      ],
-      [
-        LegendLite,
-        {
-          includeBlank: true,
-          itemSelector: '#ex-ghDay-legend',
-          radius: 2,
-          width: 11,
-          height: 11,
-          gutter: 4,
-        },
-      ],
-      [
-        CalendarLabel,
-        {
-          width: 30,
-          textAlign: 'start',
-          text: () => dayjs.weekdaysShort().map((d, i) => (i % 2 === 0 ? '' : d)),
-          padding: [25, 0, 0, 0],
-        },
-      ],
-    ]
-  );
+  // Fetch gym time data and initialize the chart
+  try {
+    const data = await rankingsStore.fetchGymTime();
+    if (data && data.length > 0) {
+      initializeChart(data); // Initialize the chart with the fetched data
+    } else {
+      console.warn('No data available to initialize the chart.');
+    }
+  } catch (error) {
+    console.error('Error fetching gym time data:', error);
+  }
 });
+
+const initializeChart = (data) => {
+  console.log('Initializing chart with data:', data);
+  cal = new CalHeatmap();
+  cal.paint({
+    data: {
+      source: data,
+      type: 'json',
+      x: 'date',
+      y: (d) => +d['value'],
+      groupY: 'max',
+    },
+    date: {
+      start: startMonthDate,
+      max: nextMonthDate,
+      locale: 'pl',
+      highlight: [new Date()],
+    },
+    range: 12,
+    scale: {
+      color: {
+        type: 'threshold',
+        range: ['#14432a', '#166b34', '#37a446', '#4dd05a'],
+        domain: [10, 20, 30],
+      },
+    },
+    domain: {
+      type: 'month',
+      gutter: 12,
+      label: { text: 'MMM', textAlign: 'start', position: 'top' },
+    },
+    subDomain: { type: 'ghDay', radius: 2, width: 14, height: 14, gutter: 4 },
+    itemSelector: '#ex-ghDay',
+  }, [
+    [
+      Tooltip,
+      {
+        text: function (date, value, dayjsDate) {
+          return (
+            (value ? value : '0') +
+            ' godzin spędzono w dniu ' +
+            dayjsDate.format('dddd, MMMM D, YYYY')
+          );
+        },
+      },
+    ],
+    [
+      LegendLite,
+      {
+        includeBlank: true,
+        itemSelector: '#ex-ghDay-legend',
+        radius: 2,
+        width: 11,
+        height: 11,
+        gutter: 4,
+      },
+    ],
+    [
+      CalendarLabel,
+      {
+        width: 30,
+        textAlign: 'start',
+        padding: [25, 0, 0, 0],
+      },
+    ],
+  ]);
+};
 </script>
 
 <style scoped>
