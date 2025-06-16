@@ -11,7 +11,8 @@
     </div>
     <div class="navbar-icons">
       <RouterLink to="/profile" class="icon" active-class="active-link">
-        <font-awesome-icon :icon="['fas', 'user']" />
+        <font-awesome-icon v-if="isAdmin" :icon="['fas', 'terminal']" />
+        <font-awesome-icon v-else :icon="['fas', 'user']" />
       </RouterLink>
       <RouterLink to="/login" class="icon" @click.prevent="auth.logout()" active-class="active-link">
         <font-awesome-icon :icon="['fas', 'sign-out-alt']" />
@@ -23,17 +24,18 @@
 <script setup>
 import {RouterLink} from 'vue-router'
 import {library} from '@fortawesome/fontawesome-svg-core'
-import {faUser, faSignOutAlt} from '@fortawesome/free-solid-svg-icons'
+import {faUser, faSignOutAlt, faTerminal} from '@fortawesome/free-solid-svg-icons'
 import {FontAwesomeIcon} from '@fortawesome/vue-fontawesome'
 import {useAuthStore} from '@/store/auth'
 import {computed} from 'vue'
 
-library.add(faUser, faSignOutAlt)
+library.add(faUser, faSignOutAlt, faTerminal)
 
 const auth = useAuthStore()
 
 // Computed properties to reactively update based on auth state
 const isTrainerOrAdmin = computed(() => auth.role === 'trainer' || auth.role === 'admin')
+const isAdmin = computed(() => auth.role === 'admin')
 </script>
 
 <style scoped>
@@ -95,5 +97,14 @@ const isTrainerOrAdmin = computed(() => auth.role === 'trainer' || auth.role ===
 
 ::v-deep(.active-link) {
   background-color: #e85b6e; /* Same as hover color */
+}
+
+.active-link {
+  background-color: #e85b6e; /* Highlight color for active links */
+  color: white; /* Text color for active links */
+  font-weight: bold; /* Optional: Make the text bold */
+  border-radius: 6px; /* Optional: Add rounded corners */
+  padding: 8px 0; /* Optional: Add padding */
+  text-align: center; /* Optional: Center the text */
 }
 </style>

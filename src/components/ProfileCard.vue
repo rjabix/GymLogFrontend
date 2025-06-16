@@ -1,6 +1,6 @@
 <template>
   <div class="container">
-    <div v-if="user" :style="{margin: 'auto'}" data-aos="fade-right">
+    <div v-if="user" :style="{ margin: 'auto' }" data-aos="fade-right">
       <h2>Twój profil</h2>
       <p><strong>Imię:</strong> {{ user.name }} {{ user.surname }}</p>
       <p><strong>Email:</strong> {{ user.email }}</p>
@@ -10,9 +10,12 @@
       <RouterLink to="/edit-profile" class="text-blue-500 hover:underline">
         Edytuj profil
       </RouterLink>
+      <RouterLink v-if="user.role === 'admin'" to="/admin" class="text-blue-500 hover:underline">
+        Panel administracyjny
+      </RouterLink>
     </div>
 
-    <div :style="{width: '100%', margin: 'auto'}" data-aos="fade-left">
+    <div :style="{ width: '100%', margin: 'auto' }" data-aos="fade-left">
       <h2>Statystyki</h2>
       <div
         :style="{
@@ -47,6 +50,19 @@
           <span :style="{ color: '#768390', fontSize: '12px' }">More</span>
         </div>
       </div>
+
+      <!-- Additional Chart -->
+      <div
+        :style="{
+          background: '#fbe9e7',
+          color: '#5d4037',
+          borderRadius: '3px',
+          padding: '1rem',
+          marginTop: '2rem',
+        }"
+      >
+        <canvas id="additionalChart" style="height: 400px;"></canvas>
+      </div>
     </div>
   </div>
 </template>
@@ -55,15 +71,16 @@
 import { useAuthStore } from '@/store/auth';
 import { useRankingsStore } from '@/store/rankings.js';
 import router from '@/router/index.js';
-import {ref, onMounted, toRaw, watch, nextTick} from 'vue';
+import { ref, onMounted, nextTick } from 'vue';
 import CalHeatmap from 'cal-heatmap';
 import 'cal-heatmap/cal-heatmap.css';
 import CalendarLabel from 'cal-heatmap/plugins/CalendarLabel';
 import LegendLite from 'cal-heatmap/plugins/LegendLite';
 import Tooltip from 'cal-heatmap/plugins/Tooltip';
-import * as dayjs from "dayjs";
-import localeDate from "dayjs/plugin/localeData";
-import backend_url from "@/router/backend_url.js";
+import * as dayjs from 'dayjs';
+import localeDate from 'dayjs/plugin/localeData';
+import { Chart } from 'chart.js';
+import {useExercisesStore} from "@/store/exercises.js";
 
 dayjs.extend(localeDate);
 
@@ -89,6 +106,7 @@ const bmiCategory = user
   : null;
 
 let cal;
+let chartInstance = null;
 const nextMonthDate = new Date().setMonth(new Date().getMonth() + 5);
 const startMonthDate = new Date().setMonth(new Date().getMonth() - 5);
 
@@ -96,84 +114,147 @@ onMounted(async () => {
   // Wait for the DOM to be fully rendered
   await nextTick();
 
-  // Fetch gym time data and initialize the chart
+  // Fetch gym time data and initialize the charts
   try {
     const data = await rankingsStore.fetchGymTime();
+    const data2 = await rankingsStore.fetchRankingForAllExercises();
     if (data && data.length > 0) {
-      initializeChart(data); // Initialize the chart with the fetched data
+      initializeCalendarHeatmap(data);
+      initializeAdditionalChart(data2);
     } else {
-      console.warn('No data available to initialize the chart.');
+      console.warn('No data available to initialize the charts.');
     }
   } catch (error) {
     console.error('Error fetching gym time data:', error);
   }
+
+
+
 });
 
-const initializeChart = (data) => {
-  console.log('Initializing chart with data:', data);
+const initializeCalendarHeatmap = (data) => {
+  console.log('Initializing calendar heatmap with data:', data);
   cal = new CalHeatmap();
-  cal.paint({
-    data: {
-      source: data,
-      type: 'json',
-      x: 'date',
-      y: (d) => +d['value'],
-      groupY: 'max',
-    },
-    date: {
-      start: startMonthDate,
-      max: nextMonthDate,
-      locale: 'pl',
-      highlight: [new Date()],
-    },
-    range: 12,
-    scale: {
-      color: {
-        type: 'threshold',
-        range: ['#14432a', '#166b34', '#37a446', '#4dd05a'],
-        domain: [10, 20, 30],
+  cal.paint(
+    {
+      data: {
+        source: data,
+        type: 'json',
+        x: 'date',
+        y: (d) => +d['value'],
+        groupY: 'max',
       },
-    },
-    domain: {
-      type: 'month',
-      gutter: 12,
-      label: { text: 'MMM', textAlign: 'start', position: 'top' },
-    },
-    subDomain: { type: 'ghDay', radius: 2, width: 14, height: 14, gutter: 4 },
-    itemSelector: '#ex-ghDay',
-  }, [
-    [
-      Tooltip,
-      {
-        text: function (date, value, dayjsDate) {
-          return (
-            (value ? value : '0') +
-            ' godzin spędzono w dniu ' +
-            dayjsDate.format('dddd, MMMM D, YYYY')
-          );
+      date: {
+        start: startMonthDate,
+        max: nextMonthDate,
+        locale: 'pl',
+        highlight: [new Date()],
+      },
+      range: 12,
+      scale: {
+        color: {
+          type: 'threshold',
+          range: ['#14432a', '#166b34', '#37a446', '#4dd05a'],
+          domain: [10, 20, 30],
         },
       },
-    ],
-    [
-      LegendLite,
-      {
-        includeBlank: true,
-        itemSelector: '#ex-ghDay-legend',
-        radius: 2,
-        width: 11,
-        height: 11,
-        gutter: 4,
+      domain: {
+        type: 'month',
+        gutter: 12,
+        label: {text: 'MMM', textAlign: 'start', position: 'top'},
       },
-    ],
+      subDomain: {type: 'ghDay', radius: 2, width: 14, height: 14, gutter: 4},
+      itemSelector: '#ex-ghDay',
+    },
     [
-      CalendarLabel,
-      {
-        width: 30,
-        textAlign: 'start',
-        padding: [25, 0, 0, 0],
+      [
+        Tooltip,
+        {
+          text: function (date, value, dayjsDate) {
+            return (
+              (value ? value : '0') +
+              ' godzin spędzono w dniu ' +
+              dayjsDate.format('dddd, MMMM D, YYYY')
+            );
+          },
+        },
+      ],
+      [
+        LegendLite,
+        {
+          includeBlank: true,
+          itemSelector: '#ex-ghDay-legend',
+          radius: 2,
+          width: 11,
+          height: 11,
+          gutter: 4,
+        },
+      ],
+      [
+        CalendarLabel,
+        {
+          width: 30,
+          textAlign: 'start',
+          padding: [25, 0, 0, 0],
+        },
+      ],
+    ]
+  );
+};
+
+const initializeAdditionalChart = (rankingsData) => {
+  console.log('Initializing additional chart with rankings data:', rankingsData);
+
+  const ctx = document.getElementById('additionalChart').getContext('2d');
+
+  // Destroy the previous chart instance if it exists
+  if (chartInstance) {
+    chartInstance.destroy();
+  }
+
+  // Prepare datasets for each exercise
+  const datasets = rankingsData.map((ranking) => ({
+    label: useExercisesStore().exercises.find(ex => ex.id === ranking.exerciseId)?.name || 'Unknown Exercise',
+    data: ranking.ranking.data,
+    borderColor: `#${Math.floor(Math.random() * 16777215).toString(16)}`, // Random color
+    backgroundColor: 'rgba(0, 0, 0, 0)', // Transparent background
+    borderWidth: 2,
+    tension: 0.3,
+  }));
+
+  // Create a new chart instance
+  chartInstance = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: rankingsData[0]?.ranking.labels || [], // Use labels from the first dataset
+      datasets: datasets,
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          display: true,
+          position: 'top',
+        },
       },
-    ],
-  ]);
+      scales: {
+        x: {
+          title: {
+            display: true,
+            text: 'Week',
+          },
+        },
+        y: {
+          title: {
+            display: true,
+            text: 'One Rep Max',
+          },
+          beginAtZero: true,
+        },
+      },
+    },
+  });
 };
 </script>
 
