@@ -228,4 +228,27 @@ export default {
   border-radius: 12px;
   cursor: pointer;
 }
+
+input[type="datetime-local"] {
+  background-color: #fbe9e7;
+  border: 2px solid #ef5350;
+  border-radius: 8px;
+  padding: 10px;
+  font-size: 1em;
+  color: #5d4037;
+  outline: none;
+  transition: border-color 0.3s ease, background-color 0.3s ease;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+input[type="datetime-local"]:focus {
+  border-color: #d84315;
+  background-color: #ffe0b2;
+}
+
+input[type="datetime-local"]::placeholder {
+  color: #a1887f;
+  font-style: italic;
+}
 </style>

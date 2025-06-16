@@ -39,6 +39,8 @@ import {
   Tooltip,
   Legend,
 } from 'chart.js';
+import axios from "axios";
+import backend_url from "@/router/backend_url.js";
 
 // Register the required components
 Chart.register(
@@ -66,12 +68,18 @@ export default {
 
       // Fetch ranking data for the selected exercise
       const rankingData = await rankingsStore.fetchRanking(exercise.id);
-
+      const avgData = await axios.get(backend_url + '/rankings/progress/avg-orm-per-exercise?exercise_id='+exercise.id, {
+        withCredentials: true
+      });
+      const processedData = {
+        labels: avgData.data.labels,
+        data: avgData.data.values,
+      };
       // Update the chart with the new data
-      updateChart(rankingData.labels, rankingData.data);
+      updateChart(rankingData.labels, rankingData.data, processedData.data);
     };
 
-    const updateChart = (labels, data) => {
+    const updateChart = (labels, data, avgData) => {
       if (chartInstance.value) {
         chartInstance.value.destroy(); // Destroy the previous chart instance
       }
@@ -83,13 +91,21 @@ export default {
           labels: labels,
           datasets: [
             {
-              label: 'One Rep Max Progression',
+              label: 'Your One Rep Max Progression',
               data: data,
               borderColor: '#42a5f5',
               backgroundColor: 'rgba(66, 165, 245, 0.2)',
               borderWidth: 2,
               tension: 0.3,
             },
+            {
+              label: 'Average One Rep Max Progression',
+              data: avgData,
+              borderColor: 'rgba(222,14,39,0.86)',
+              backgroundColor: 'rgba(222,14,39,0.86)',
+              borderWidth: 2,
+              tension: 0.3,
+            }
           ],
         },
         options: {

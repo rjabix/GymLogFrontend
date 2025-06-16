@@ -155,7 +155,7 @@ const initializeCalendarHeatmap = (data) => {
         color: {
           type: 'threshold',
           range: ['#14432a', '#166b34', '#37a446', '#4dd05a'],
-          domain: [10, 20, 30],
+          domain: [1, 2, 3],
         },
       },
       domain: {

@@ -68,6 +68,8 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 import {generateMockupPerformedExercises} from "@/models/performed_exercise.js";
 import {useExercisesStore} from "@/store/exercises.js";
+import backend_url from "@/router/backend_url.js";
+import axios from "axios";
 
 // Importuj klasy i funkcje do generowania mockowych danych
 
@@ -85,12 +87,11 @@ export default {
       Exercises: []
     };
   },
-  created() {
-    //TODO Zmienic mockupy na prawdziwe dane z API!
+  async created() {
     const exercisesStore = useExercisesStore();
-    exercisesStore.fetchExercises().then(() => {
+    exercisesStore.fetchExercises().then(async () => {
       this.Exercises = exercisesStore.exercises; // Replace mockup data with store data
-      this.mockPerformedExercises = generateMockupPerformedExercises();
+      this.mockPerformedExercises = (await axios.get(backend_url + '/trainer/pending_exercises', {withCredentials: true})).data;
       this.processRawData();
     });
   },
@@ -179,6 +180,13 @@ export default {
         //TODO Zamień na prawdziwą wysyłkę do API
         console.log(JSON.stringify(submissionPayload, null, 2));
         console.log("--- Wysyłka zakończona (symulacja) ---");
+        axios.post(backend_url + '/trainer/verify-exercises', submissionPayload, {withCredentials: true})
+          .then(response => {
+            console.log("Odpowiedź z serwera:", response.data);
+          })
+          .catch(error => {
+            console.error("Błąd podczas wysyłania ocen:", error);
+          });
         alert(`Wysłano ${acceptedExerciseIds.length} zaakceptowanych i ${deniedExerciseIds.length} odrzuconych ćwiczeń! Sprawdź konsolę.`);
 
         // Remove exercises with accepted/denied IDs from local array
@@ -262,7 +270,7 @@ export default {
 };
 
 const getExercisesForTrainer = async () => {
-  
+
 }
 
 </script>

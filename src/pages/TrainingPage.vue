@@ -19,7 +19,7 @@
               <div class="detail-pill">Powtórzenia: {{ exercise.reps }}</div>
               <div class="detail-pill">
                 Zweryfikowano:
-                {{ exercise.isVerified ? 'tak' : 'nie' }}
+                {{ exercise.is_verified ? 'tak' : 'nie' }}
               </div>
             </div>
           </div>
@@ -150,7 +150,7 @@ export default {
     const submitExercise = () => {
       if (
         !newExercise.value.exercise_id ||
-        newExercise.value.weight <= 0 ||
+        newExercise.value.weight < 0 ||
         newExercise.value.sets <= 0 ||
         newExercise.value.reps <= 0
       ) {
